@@ -47,8 +47,8 @@ public class ModulesService {
         module.setDescription(dto.getDescription());
         module.setOrderNumber(dto.getOrderNumber());
 
-        // ✅ KHỞI TẠO TRẠNG THÁI MẶC ĐỊNH
-        module.setPublished(false);
+        // ✅ SỬ DỤNG GIÁ TRỊ TỪ DTO, NẾU KHÔNG CÓ THÌ MẶC ĐỊNH LÀ false
+        module.setPublished(dto.isPublished() != null ? dto.isPublished() : false);
 
         return modulesRepository.save(module);
     }

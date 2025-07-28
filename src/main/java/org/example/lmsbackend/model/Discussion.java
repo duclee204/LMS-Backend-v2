@@ -9,6 +9,11 @@ import java.time.Instant;
 @Entity
 @Table(name = "discussions")
 public class Discussion {
+    public enum DiscussionType {
+        PUBLIC, // Visible to all course members
+        PRIVATE // Visible only to specific user (student to instructor)
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "discussion_id", nullable = false)
@@ -50,7 +55,8 @@ public class Discussion {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) createdAt = Instant.now();
+        if (createdAt == null)
+            createdAt = Instant.now();
     }
 
     public Integer getId() {

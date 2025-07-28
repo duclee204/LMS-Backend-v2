@@ -3,7 +3,7 @@ package org.example.lmsbackend.service;
 import org.example.lmsbackend.dto.DiscussionDTO;
 import org.example.lmsbackend.model.Course;
 import org.example.lmsbackend.model.Discussion;
-import org.example.lmsbackend.model.DiscussionType;
+import org.example.lmsbackend.model.Discussion.DiscussionType;
 import org.example.lmsbackend.model.User;
 import org.example.lmsbackend.repository.CourseRepository;
 import org.example.lmsbackend.repository.DiscussionRepository;

@@ -44,6 +44,7 @@ public class ContentsRestController {
                                           @RequestParam("orderNumber") int orderNumber,
                                           @RequestParam("isPublished") boolean isPublished,
                                           @RequestParam(value = "description", required = false) String description,
+                                          @RequestParam(value = "contentUrl", required = false) String contentUrl,
                                           @RequestParam(value = "file", required = false) MultipartFile file,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -53,7 +54,7 @@ public class ContentsRestController {
             }
             
             Content content = contentService.createContent(
-                moduleId, title, contentType, description, orderNumber, isPublished, file
+                moduleId, title, contentType, description, contentUrl, orderNumber, isPublished, file
             );
             
             // Convert to DTO for response

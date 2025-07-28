@@ -22,7 +22,7 @@ public class ContentService {
 
     // ✅ Tạo content mới
     public Content createContent(int moduleId, String title, String contentType, String description, 
-                                int orderNumber, boolean isPublished, MultipartFile file) throws IOException {
+                                String contentUrl, int orderNumber, boolean isPublished, MultipartFile file) throws IOException {
         Modules module = modulesService.getModuleById(moduleId);
         
         // Kiểm tra trùng orderNumber khi tạo mới (không loại trừ ai vì đây là tạo mới)
@@ -43,6 +43,11 @@ public class ContentService {
             // content.setDescription(description);
         }
         
+        // Handle contentUrl for link type content
+        if (contentUrl != null && !contentUrl.trim().isEmpty()) {
+            content.setContentUrl(contentUrl);
+        }
+        
         // Handle file upload if provided
         if (file != null && !file.isEmpty()) {
             String uploadDir = "uploads/modules/" + moduleId;
@@ -53,7 +58,10 @@ public class ContentService {
             file.transferTo(path);
             
             content.setFileName(fileName);
-            content.setContentUrl("/" + path.toString().replace("\\", "/"));
+            // Only set contentUrl from file if no URL was provided
+            if (contentUrl == null || contentUrl.trim().isEmpty()) {
+                content.setContentUrl("/" + path.toString().replace("\\", "/"));
+            }
         }
         
         return contentRepository.save(content);
