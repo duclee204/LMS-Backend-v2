@@ -41,6 +41,14 @@ public class Quizzes {
     @Column(name = "course_id", insertable = false, updatable = false)
     private Integer courseId;
 
+    // Thêm quan hệ với Module
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "module_id")
+    private Modules module;
+
+    @Column(name = "order_number")
+    private Integer orderNumber;
+
     // Getters and Setters
     public Integer getQuizId() {
         return quizId;
@@ -136,5 +144,21 @@ public class Quizzes {
 
     public void setCourseId(Integer courseId) {
         this.courseId = courseId;
+    }
+
+    public Modules getModule() {
+        return module;
+    }
+
+    public void setModule(Modules module) {
+        this.module = module;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
     }
 }

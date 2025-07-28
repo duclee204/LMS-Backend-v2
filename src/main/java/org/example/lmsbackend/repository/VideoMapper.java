@@ -8,15 +8,15 @@ import java.util.List;
 public interface VideoMapper {
 
     @Insert("""
-        INSERT INTO videos (title, description, file_url, duration, file_size, mime_type, course_id, instructor_id, uploaded_at)
-        VALUES (#{title}, #{description}, #{fileUrl}, #{duration}, #{fileSize}, #{mimeType}, #{course.courseId}, #{instructor.userId}, NOW())
+        INSERT INTO videos (title, description, file_url, duration, file_size, mime_type, course_id, instructor_id, module_id, order_number, uploaded_at)
+        VALUES (#{title}, #{description}, #{fileUrl}, #{duration}, #{fileSize}, #{mimeType}, #{course.courseId}, #{instructor.userId}, #{module.id}, #{orderNumber}, NOW())
     """)
     @Options(useGeneratedKeys = true, keyProperty = "videoId")
     int insertVideo(Video video);
 
     @Select("""
     SELECT 
-        video_id, title, description, file_url, duration, file_size, mime_type, uploaded_at
+        video_id, title, description, file_url, duration, file_size, mime_type, module_id, order_number, uploaded_at
     FROM videos
     WHERE (#{title} IS NULL OR title LIKE CONCAT('%', #{title}, '%'))
 """)
@@ -28,7 +28,10 @@ public interface VideoMapper {
             @Result(property = "duration", column = "duration"),
             @Result(property = "fileSize", column = "file_size"),
             @Result(property = "mimeType", column = "mime_type"),
+            @Result(property = "orderNumber", column = "order_number"),
             @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "module", column = "module_id", 
+                    one = @One(select = "org.example.lmsbackend.repository.ModulesMapper.findById"))
     })
     List<Video> findVideos(@Param("title") String title);
 
@@ -95,5 +98,26 @@ public interface VideoMapper {
                     one = @One(select = "org.example.lmsbackend.repository.UserMapper.findById"))
     })
     List<Video> findVideosByCourseId(@Param("courseId") Integer courseId);
+
+    // Thêm method để lấy video theo module
+    @Select("SELECT * FROM videos WHERE module_id = #{moduleId} ORDER BY order_number")
+    @Results({
+            @Result(property = "videoId", column = "video_id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "description", column = "description"),
+            @Result(property = "fileUrl", column = "file_url"),
+            @Result(property = "duration", column = "duration"),
+            @Result(property = "fileSize", column = "file_size"),
+            @Result(property = "mimeType", column = "mime_type"),
+            @Result(property = "orderNumber", column = "order_number"),
+            @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "course", column = "course_id", 
+                    one = @One(select = "org.example.lmsbackend.repository.CourseMapper.findById")),
+            @Result(property = "instructor", column = "instructor_id", 
+                    one = @One(select = "org.example.lmsbackend.repository.UserMapper.findById")),
+            @Result(property = "module", column = "module_id", 
+                    one = @One(select = "org.example.lmsbackend.repository.ModulesMapper.findById"))
+    })
+    List<Video> findVideosByModuleId(@Param("moduleId") Integer moduleId);
 
 }

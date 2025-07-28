@@ -10,4 +10,9 @@ import java.util.List;
 public interface QuizzesRepository extends JpaRepository<Quizzes, Integer> {
     List<Quizzes> findByCourseId(Integer courseId);
     List<Quizzes> findByCourseIdAndPublishTrue(Integer courseId);
+    
+    // Thêm methods cho module
+    List<Quizzes> findByModuleId(Integer moduleId);
+    List<Quizzes> findByModuleIdAndPublishTrue(Integer moduleId);
+    List<Quizzes> findByModuleIdOrderByOrderNumber(Integer moduleId);
 }

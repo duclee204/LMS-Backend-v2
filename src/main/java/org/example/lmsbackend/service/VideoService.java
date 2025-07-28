@@ -5,6 +5,7 @@ import org.example.lmsbackend.utils.VideoMapperUtil;
 import org.example.lmsbackend.model.Video;
 import org.example.lmsbackend.model.Course;
 import org.example.lmsbackend.model.User;
+import org.example.lmsbackend.model.Modules;
 import org.example.lmsbackend.repository.VideoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,14 @@ public class VideoService {
                 .collect(Collectors.toList());
     }
 
-    public VideoDTO uploadVideo(MultipartFile file, String title, String description, Integer courseId, Integer instructorId) {
+    public List<VideoDTO> getVideosByModule(Integer moduleId) {
+        List<Video> videos = videoMapper.findVideosByModuleId(moduleId);
+        return videos.stream()
+                .map(VideoMapperUtil::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public VideoDTO uploadVideo(MultipartFile file, String title, String description, Integer courseId, Integer moduleId, Integer instructorId) {
         try {
             String fileUrl = saveFile(file);
             if (fileUrl == null) return null;
@@ -77,6 +85,13 @@ public class VideoService {
             User instructor = new User();
             instructor.setUserId(instructorId);
             video.setInstructor(instructor);
+            
+            // Set module if provided
+            if (moduleId != null) {
+                Modules module = new Modules();
+                module.setId(moduleId);
+                video.setModule(module);
+            }
             
             videoMapper.insertVideo(video);
             return VideoMapperUtil.toDTO(video);

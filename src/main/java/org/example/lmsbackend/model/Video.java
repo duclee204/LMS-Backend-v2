@@ -36,6 +36,14 @@ public class Video {
     @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
 
+    // Thêm quan hệ với Module
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "module_id")
+    private Modules module;
+
+    @Column(name = "order_number")
+    private Integer orderNumber;
+
     @PrePersist
     protected void onCreate() {
         this.uploadedAt = LocalDateTime.now();
@@ -121,5 +129,21 @@ public class Video {
 
     public void setInstructor(User instructor) {
         this.instructor = instructor;
+    }
+
+    public Modules getModule() {
+        return module;
+    }
+
+    public void setModule(Modules module) {
+        this.module = module;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
     }
 }

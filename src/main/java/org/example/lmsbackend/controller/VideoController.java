@@ -57,13 +57,14 @@ public class VideoController {
                                               @RequestParam("title") String title,
                                               @RequestParam("description") String description,
                                               @RequestParam("courseId") Integer courseId,
+                                              @RequestParam(value = "moduleId", required = false) Integer moduleId,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         // Kiểm tra giảng viên có dạy khóa này không
         if (!courseService.isInstructorOfCourse(userDetails.getUserId(), courseId)) {
             return ResponseEntity.status(403).build();
         }
         
-        VideoDTO videoDTO = videoService.uploadVideo(file, title, description, courseId, userDetails.getUserId());
+        VideoDTO videoDTO = videoService.uploadVideo(file, title, description, courseId, moduleId, userDetails.getUserId());
         if (videoDTO == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -161,5 +162,14 @@ public class VideoController {
     @GetMapping
     public ResponseEntity<List<VideoDTO>> getAllVideos(@RequestParam(required = false) String title) {
         return ResponseEntity.ok(videoService.getAllVideos(title));
+    }
+
+    @GetMapping("/module/{moduleId}")
+    @PreAuthorize("hasAnyRole('admin', 'instructor', 'student')")
+    public ResponseEntity<List<VideoDTO>> getVideosByModule(@PathVariable Integer moduleId,
+                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // TODO: Add proper authorization check for module access
+        List<VideoDTO> videos = videoService.getVideosByModule(moduleId);
+        return ResponseEntity.ok(videos);
     }
 }

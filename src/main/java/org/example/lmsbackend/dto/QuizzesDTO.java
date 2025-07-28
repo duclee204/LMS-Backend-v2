@@ -15,6 +15,7 @@ public class QuizzesDTO {
     private Boolean showOneQuestionAtATime;
     private Boolean publish;
     private Integer courseId;
+    private Integer moduleId;
 
     // Getters and Setters
     public Integer getQuizId() { return quizId; }
@@ -49,4 +50,7 @@ public class QuizzesDTO {
 
     public Integer getCourseId() { return courseId; }
     public void setCourseId(Integer courseId) { this.courseId = courseId; }
+
+    public Integer getModuleId() { return moduleId; }
+    public void setModuleId(Integer moduleId) { this.moduleId = moduleId; }
 }

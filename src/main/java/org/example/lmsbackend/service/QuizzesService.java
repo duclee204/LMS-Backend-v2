@@ -3,6 +3,7 @@ package org.example.lmsbackend.service;
 import org.example.lmsbackend.model.Quizzes;
 import org.example.lmsbackend.model.Questions;
 import org.example.lmsbackend.model.Course;
+import org.example.lmsbackend.model.Modules;
 import org.example.lmsbackend.dto.QuizzesDTO;
 import org.example.lmsbackend.repository.QuizzesRepository;
 import org.example.lmsbackend.repository.CourseRepository;
@@ -51,6 +52,13 @@ public class QuizzesService {
             Course course = courseRepository.findById(dto.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Course not found with ID: " + dto.getCourseId()));
             quiz.setCourse(course);
+        }
+        
+        // Set module relationship if provided
+        if (dto.getModuleId() != null) {
+            Modules module = new Modules();
+            module.setId(dto.getModuleId());
+            quiz.setModule(module);
         }
         
         return quizzesRepository.save(quiz);
@@ -204,5 +212,32 @@ public class QuizzesService {
             .orElseThrow(() -> new RuntimeException("Quiz not found with ID: " + quizId));
         quiz.setPublish(publish);
         quizzesRepository.save(quiz);
+    }
+
+    public List<QuizzesDTO> getQuizzesByModule(Integer moduleId, Boolean publish) {
+        List<Quizzes> entities;
+        if (publish != null && publish) {
+            entities = quizzesRepository.findByModuleIdAndPublishTrue(moduleId);
+        } else {
+            entities = quizzesRepository.findByModuleIdOrderByOrderNumber(moduleId);
+        }
+        
+        List<QuizzesDTO> dtos = new ArrayList<>();
+        for (Quizzes q : entities) {
+            QuizzesDTO dto = new QuizzesDTO();
+            dto.setQuizId(q.getQuizId());
+            dto.setTitle(q.getTitle());
+            dto.setDescription(q.getDescription());
+            dto.setQuizType(q.getQuizType());
+            dto.setTimeLimit(q.getTimeLimit());
+            dto.setShuffleAnswers(q.getShuffleAnswers());
+            dto.setAllowMultipleAttempts(q.getAllowMultipleAttempts());
+            dto.setShowQuizResponses(q.getShowQuizResponses());
+            dto.setShowOneQuestionAtATime(q.getShowOneQuestionAtATime());
+            dto.setPublish(q.getPublish());
+            dto.setCourseId(q.getCourseId());
+            dtos.add(dto);
+        }
+        return dtos;
     }
 }

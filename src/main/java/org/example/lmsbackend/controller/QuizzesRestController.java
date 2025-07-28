@@ -92,4 +92,11 @@ public class QuizzesRestController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/module/{moduleId}")
+    public ResponseEntity<List<QuizzesDTO>> getQuizzesByModule(
+            @PathVariable Integer moduleId,
+            @RequestParam(required = false) Boolean publish) {
+        return ResponseEntity.ok(quizService.getQuizzesByModule(moduleId, publish));
+    }
 }
