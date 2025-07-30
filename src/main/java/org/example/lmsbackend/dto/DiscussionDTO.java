@@ -1,6 +1,7 @@
 package org.example.lmsbackend.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 public class DiscussionDTO {
     private Integer id;
@@ -11,7 +12,8 @@ public class DiscussionDTO {
     private String title;
     private String content;
     private String type; // PUBLIC or PRIVATE
-    private Integer targetUserId; // For private discussions
+    private Integer targetUserId; // For private discussions (single target - backward compatibility)
+    private List<Integer> targetUserIds; // For private discussions (multiple targets)
     private String targetUserName;
     private String attachmentUrl; // File attachment URL
     private String attachmentName; // Original file name
@@ -44,6 +46,9 @@ public class DiscussionDTO {
     
     public Integer getTargetUserId() { return targetUserId; }
     public void setTargetUserId(Integer targetUserId) { this.targetUserId = targetUserId; }
+    
+    public List<Integer> getTargetUserIds() { return targetUserIds; }
+    public void setTargetUserIds(List<Integer> targetUserIds) { this.targetUserIds = targetUserIds; }
     
     public String getTargetUserName() { return targetUserName; }
     public void setTargetUserName(String targetUserName) { this.targetUserName = targetUserName; }

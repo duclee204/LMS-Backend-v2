@@ -101,11 +101,13 @@ public interface QuestionsMapper {
         UPDATE quizzes
         SET title = #{title}, 
             description = #{description}, 
-            time_limit = #{timeLimit}
+            time_limit = #{timeLimit},
+            allow_multiple_attempts = #{allowMultipleAttempts}
         WHERE quiz_id = #{quizId}
     """)
     int updateQuizBasicInfo(@Param("quizId") Integer quizId,
                            @Param("title") String title,
                            @Param("description") String description,
-                           @Param("timeLimit") Integer timeLimit);
+                           @Param("timeLimit") Integer timeLimit,
+                           @Param("allowMultipleAttempts") Boolean allowMultipleAttempts);
 }

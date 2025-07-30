@@ -52,10 +52,8 @@ public class ModuleProgress {
             this.completedAt = LocalDateTime.now();
         }
         
-        // Auto-unlock test when content and video are completed
-        if (contentCompleted && videoCompleted && !testUnlocked) {
-            this.testUnlocked = true;
-        }
+        // Removed learning sequence restriction - test is always unlocked for free access
+        this.testUnlocked = true;
     }
 
     // Getters and Setters

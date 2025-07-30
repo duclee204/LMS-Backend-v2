@@ -58,6 +58,7 @@ public class QuizManagementController {
             editData.setTitle(quiz.getTitle());
             editData.setDescription(quiz.getDescription());
             editData.setTimeLimit(quiz.getTimeLimit());
+            editData.setAllowMultipleAttempts(quiz.getAllowMultipleAttempts());
             // Tạm thời bỏ qua totalMarks và maxAttempts vì không có trong model
             editData.setQuestions(questions);
             

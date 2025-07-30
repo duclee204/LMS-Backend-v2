@@ -243,7 +243,23 @@ public class ExamSubmissionService {
                 System.out.println("User ID or Quiz ID is null - returning false");
                 return false;
             }
-            
+
+            // First, get the quiz to check if multiple attempts are allowed
+            Quizzes quiz = quizzesMapper.findById(quizId);
+            if (quiz == null) {
+                System.out.println("Quiz not found - returning false");
+                return false;
+            }
+
+            System.out.println("Quiz allowMultipleAttempts: " + quiz.getAllowMultipleAttempts());
+
+            // If multiple attempts are allowed, user can always retake
+            if (quiz.getAllowMultipleAttempts() != null && quiz.getAllowMultipleAttempts()) {
+                System.out.println("✅ Multiple attempts allowed - user can take quiz");
+                return false; // Allow user to take quiz again
+            }
+
+            // For single attempt quizzes, check if user has already submitted
             UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
             boolean hasSubmitted = attempt != null;
             
@@ -269,8 +285,29 @@ public class ExamSubmissionService {
                 System.out.println("User ID or Quiz ID is null - returning null");
                 return null;
             }
+
+            // Get the quiz to check if multiple attempts are allowed
+            Quizzes quiz = quizzesMapper.findById(quizId);
+            if (quiz == null) {
+                System.out.println("Quiz not found - returning null");
+                return null;
+            }
+
+            UserQuizAttempt attempt = null;
+
+            if (quiz.getAllowMultipleAttempts() != null && quiz.getAllowMultipleAttempts()) {
+                // For multiple attempts, get the latest attempt
+                List<UserQuizAttempt> attempts = userQuizAttemptMapper.findAllAttemptsByUserAndQuiz(userId, quizId);
+                if (attempts != null && !attempts.isEmpty()) {
+                    attempt = attempts.get(0); // First one is the latest due to ORDER BY attempted_at DESC
+                    System.out.println("Found " + attempts.size() + " attempts, using latest attempt: " + attempt.getId());
+                }
+            } else {
+                // For single attempt, get the only attempt
+                attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
+                System.out.println("Single attempt mode - found attempt: " + (attempt != null ? attempt.getId() : "none"));
+            }
             
-            UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
             if (attempt == null) {
                 System.out.println("No attempt found - returning null");
                 return null;
@@ -290,6 +327,36 @@ public class ExamSubmissionService {
             System.err.println("Error getting user quiz result: " + e.getMessage());
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * Get attempt count for a user and quiz
+     */
+    public int getUserAttemptCount(Integer userId, Integer quizId) {
+        try {
+            if (userId == null || quizId == null) {
+                return 0;
+            }
+            return userQuizAttemptMapper.countAttemptsByUserAndQuiz(userId, quizId);
+        } catch (Exception e) {
+            System.err.println("Error getting user attempt count: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get all attempts for a user and quiz
+     */
+    public List<UserQuizAttempt> getUserAttempts(Integer userId, Integer quizId) {
+        try {
+            if (userId == null || quizId == null) {
+                return new ArrayList<>();
+            }
+            return userQuizAttemptMapper.findAllAttemptsByUserAndQuiz(userId, quizId);
+        } catch (Exception e) {
+            System.err.println("Error getting user attempts: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

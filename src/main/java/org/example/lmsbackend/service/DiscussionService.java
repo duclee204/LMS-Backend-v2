@@ -43,11 +43,43 @@ public class DiscussionService {
     }
 
     public DiscussionDTO createDiscussion(DiscussionDTO dto) {
-        System.out.println("??? Creating discussion - DTO title: '" + dto.getTitle() + "', type: " + dto.getType());
+        System.out.println("🔥 Creating discussion - DTO title: '" + dto.getTitle() + "', type: " + dto.getType());
         Optional<Course> courseOpt = courseRepository.findById(dto.getCourseId());
         Optional<User> userOpt = userRepository.findById(dto.getUserId());
         if (courseOpt.isEmpty() || userOpt.isEmpty()) return null;
         
+        Discussion firstDiscussion = null;
+        
+        // Handle multiple target users for private discussions
+        if ("PRIVATE".equals(dto.getType()) && dto.getTargetUserIds() != null && !dto.getTargetUserIds().isEmpty()) {
+            System.out.println("🔥 Creating private discussion for multiple users: " + dto.getTargetUserIds().size());
+            
+            for (Integer targetUserId : dto.getTargetUserIds()) {
+                Discussion discussion = new Discussion();
+                discussion.setCourse(courseOpt.get());
+                discussion.setUser(userOpt.get());
+                discussion.setTitle(dto.getTitle());
+                discussion.setContent(dto.getContent());
+                discussion.setAttachmentUrl(dto.getAttachmentUrl());
+                discussion.setAttachmentName(dto.getAttachmentName());
+                discussion.setType(DiscussionType.PRIVATE);
+                
+                Optional<User> targetUserOpt = userRepository.findById(targetUserId);
+                if (targetUserOpt.isPresent()) {
+                    discussion.setTargetUser(targetUserOpt.get());
+                    System.out.println("🔥 Private discussion to user: " + targetUserOpt.get().getFullName());
+                    
+                    Discussion saved = discussionRepository.save(discussion);
+                    if (firstDiscussion == null) {
+                        firstDiscussion = saved; // Return the first created discussion
+                    }
+                }
+            }
+            
+            return firstDiscussion != null ? toDTO(firstDiscussion) : null;
+        }
+        
+        // Handle single target user or public discussion (original logic)
         Discussion discussion = new Discussion();
         discussion.setCourse(courseOpt.get());
         discussion.setUser(userOpt.get());
@@ -67,15 +99,15 @@ public class DiscussionService {
                 Optional<User> targetUserOpt = userRepository.findById(dto.getTargetUserId());
                 if (targetUserOpt.isPresent()) {
                     discussion.setTargetUser(targetUserOpt.get());
-                    System.out.println("??? Private discussion to user: " + targetUserOpt.get().getFullName());
+                    System.out.println("🔥 Private discussion to user: " + targetUserOpt.get().getFullName());
                 }
             }
         } else {
             discussion.setType(DiscussionType.PUBLIC);
-            System.out.println("??? Public discussion");
+            System.out.println("🔥 Public discussion");
         }
         
-        System.out.println("??? About to save discussion with title: '" + discussion.getTitle() + "', type: " + discussion.getType());
+        System.out.println("🔥 About to save discussion with title: '" + discussion.getTitle() + "', type: " + discussion.getType());
         Discussion saved = discussionRepository.save(discussion);
         return toDTO(saved);
     }

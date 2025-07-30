@@ -204,7 +204,8 @@ public class QuestionsService {
             return questionsMapper.updateQuizBasicInfo(quizId, 
                 updateData.getTitle(), 
                 updateData.getDescription(), 
-                updateData.getTimeLimit()) > 0;
+                updateData.getTimeLimit(),
+                updateData.getAllowMultipleAttempts()) > 0;
         } catch (Exception e) {
             System.err.println("Error updating quiz basic info: " + e.getMessage());
             return false;

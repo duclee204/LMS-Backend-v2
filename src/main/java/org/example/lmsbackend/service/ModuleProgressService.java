@@ -56,12 +56,8 @@ public class ModuleProgressService {
     }
 
     public boolean isTestUnlocked(Integer userId, Integer moduleId) {
-        Optional<ModuleProgress> progress = moduleProgressMapper.findByUserAndModule(userId, moduleId);
-        if (progress.isPresent()) {
-            ModuleProgress p = progress.get();
-            return p.getContentCompleted() && p.getVideoCompleted();
-        }
-        return false;
+        // Removed learning sequence restriction - students can access tests freely
+        return true;
     }
 
     public boolean isModuleCompleted(Integer userId, Integer moduleId) {

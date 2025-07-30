@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -42,10 +44,15 @@ public class ExamSubmissionController {
             QuizResultDTO result = examSubmissionService.submitExam(
                 userDetails.getUserId(), submissionDTO);
 
+            // Get attempt count after submission
+            int attemptCount = examSubmissionService.getUserAttemptCount(
+                userDetails.getUserId(), submissionDTO.getQuizId());
+
             return ResponseEntity.ok().body(Map.of(
                 "message", "Nộp bài thành công!",
                 "success", true,
-                "result", result
+                "result", result,
+                "attemptCount", attemptCount
             ));
 
         } catch (Exception e) {
@@ -83,6 +90,13 @@ public class ExamSubmissionController {
                 userDetails.getUserId(), quizId);
             
             QuizResultDTO result = null;
+            int attemptCount = 0;
+            List<org.example.lmsbackend.model.UserQuizAttempt> attempts = new ArrayList<>();
+            
+            // Get attempt information
+            attemptCount = examSubmissionService.getUserAttemptCount(userDetails.getUserId(), quizId);
+            attempts = examSubmissionService.getUserAttempts(userDetails.getUserId(), quizId);
+            
             if (hasSubmitted) {
                 result = examSubmissionService.getUserQuizResult(userDetails.getUserId(), quizId);
                 System.out.println("✅ User has submitted. Result found: " + (result != null));
@@ -93,7 +107,9 @@ public class ExamSubmissionController {
             return ResponseEntity.ok().body(Map.of(
                 "hasSubmitted", hasSubmitted,
                 "result", result,
-                "success", true
+                "success", true,
+                "attemptCount", attemptCount,
+                "attempts", attempts
             ));
 
         } catch (Exception e) {
