@@ -15,30 +15,34 @@ import java.util.Arrays;
 public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Map cho thư mục uploads tổng quát
-        String uploadPath = Paths.get("uploads").toAbsolutePath().toUri().toString();
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations(uploadPath);
-        registry.addResourceHandler("/cvs/**")
-                .addResourceLocations(uploadPath + "cvs/");
-        // Map riêng cho ảnh khóa học
-        String courseImagesPath = Paths.get("uploads", "imagescourse").toAbsolutePath().toUri().toString();
-        registry.addResourceHandler("/images/courses/**")
-                .addResourceLocations(courseImagesPath);
+        // Base path to 'uploads'
+        String uploadBasePath = Paths.get("uploads").toAbsolutePath().toUri().toString(); // e.g., file:/C:/.../uploads/
+
+        // Avatars
         registry.addResourceHandler("/images/avatars/**")
-                .addResourceLocations(uploadPath + "avatars/");
+                .addResourceLocations(uploadBasePath + "avatars/");
 
-        // Map cho video
-        String videosPath = Paths.get("uploads", "videos").toAbsolutePath().toUri().toString();
+        // Course images
+        registry.addResourceHandler("/images/courses/**")
+                .addResourceLocations(uploadBasePath + "imagescourse/");
+
+        // General image fallback
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations(uploadBasePath);
+
+        // CVs
+        registry.addResourceHandler("/cvs/**")
+                .addResourceLocations(uploadBasePath + "cvs/");
+
+        // Videos
         registry.addResourceHandler("/videos/**")
-                .addResourceLocations(videosPath);
+                .addResourceLocations(uploadBasePath + "videos/");
 
-        // Map cho module content files  
-        String modulesPath = Paths.get("uploads", "modules").toAbsolutePath().toUri().toString();
+        // Module content files
         registry.addResourceHandler("/uploads/modules/**")
-                .addResourceLocations(modulesPath);
-
+                .addResourceLocations(uploadBasePath + "modules/");
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

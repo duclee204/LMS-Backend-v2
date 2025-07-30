@@ -2,6 +2,7 @@ package org.example.lmsbackend.controller;
 
 import org.example.lmsbackend.model.User;
 import org.example.lmsbackend.dto.UserDTO;
+import org.example.lmsbackend.security.CustomUserDetails;
 import org.example.lmsbackend.service.FileStorageService;
 import org.example.lmsbackend.service.UserService;
 import org.example.lmsbackend.utils.JwtTokenUtil;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -153,7 +155,40 @@ public class UserRestController {
         List<User> users = userService.getUsers(userId, role, isVerified, username);
         return ResponseEntity.ok(users);
     }
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('admin', 'instructor', 'student')")
+    public ResponseEntity<?> getUserById(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails currentUser) {
+        try {
+            // ✅ Nếu người dùng không phải admin → chỉ được xem chính họ
+            if (!currentUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_admin"))
+                    && !currentUser.getUserId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            }
 
+            User user = userService.getUserById(id);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error retrieving user"));
+        }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getCurrentUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userService.getUserById(Long.valueOf(userDetails.getUserId()));
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error retrieving profile"));
+        }
+    }
 
     // ✅ API xóa người dùng
         @DeleteMapping("/delete/{id}")
