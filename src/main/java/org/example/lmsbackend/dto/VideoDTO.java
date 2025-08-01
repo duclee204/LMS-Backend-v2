@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class VideoDTO {
-    private Long videoId;
+    private Integer videoId;
     private String title;
     private String description;
     private String fileUrl;
@@ -17,11 +17,14 @@ public class VideoDTO {
     private String courseName;
     private Integer instructorId;
     private String instructorName;
+    private Integer moduleId;
+    private Integer orderNumber;
+    private Boolean published;
 
     // Constructors
     public VideoDTO() {}
 
-    public VideoDTO(Long videoId, String title, String description, String fileUrl,
+    public VideoDTO(Integer videoId, String title, String description, String fileUrl,
                     Integer duration, Long fileSize, String mimeType, LocalDateTime uploadedAt,
                     Integer courseId, String courseName, Integer instructorId, String instructorName) {
         this.videoId = videoId;
@@ -39,11 +42,11 @@ public class VideoDTO {
     }
 
     // Getters and Setters
-    public Long getVideoId() {
+    public Integer getVideoId() {
         return videoId;
     }
 
-    public void setVideoId(Long videoId) {
+    public void setVideoId(Integer videoId) {
         this.videoId = videoId;
     }
 
@@ -133,5 +136,29 @@ public class VideoDTO {
 
     public void setInstructorName(String instructorName) {
         this.instructorName = instructorName;
+    }
+
+    public Integer getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Integer moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public Boolean getPublished() {
+        return published;
+    }
+
+    public void setPublished(Boolean published) {
+        this.published = published;
     }
 }

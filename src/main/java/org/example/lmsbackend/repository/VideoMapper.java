@@ -8,17 +8,18 @@ import java.util.List;
 public interface VideoMapper {
 
     @Insert("""
-        INSERT INTO videos (title, description, file_url, duration, file_size, mime_type, course_id, instructor_id, module_id, order_number, uploaded_at)
-        VALUES (#{title}, #{description}, #{fileUrl}, #{duration}, #{fileSize}, #{mimeType}, #{course.courseId}, #{instructor.userId}, #{module.id}, #{orderNumber}, NOW())
+        INSERT INTO videos (title, description, file_url, duration, file_size, mime_type, course_id, instructor_id, module_id, order_number, uploaded_at, published)
+        VALUES (#{title}, #{description}, #{fileUrl}, #{duration}, #{fileSize}, #{mimeType}, #{course.courseId}, #{instructor.userId}, #{module.id}, #{orderNumber}, NOW(), #{published})
     """)
     @Options(useGeneratedKeys = true, keyProperty = "videoId")
     int insertVideo(Video video);
 
     @Select("""
     SELECT 
-        video_id, title, description, file_url, duration, file_size, mime_type, module_id, order_number, uploaded_at
+        video_id, title, description, file_url, duration, file_size, mime_type, module_id, order_number, uploaded_at, published
     FROM videos
-    WHERE (#{title} IS NULL OR title LIKE CONCAT('%', #{title}, '%'))
+    WHERE module_id IS NOT NULL 
+    AND (#{title} IS NULL OR title LIKE CONCAT('%', #{title}, '%'))
 """)
     @Results({
             @Result(property = "videoId", column = "video_id"),
@@ -30,6 +31,7 @@ public interface VideoMapper {
             @Result(property = "mimeType", column = "mime_type"),
             @Result(property = "orderNumber", column = "order_number"),
             @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "published", column = "published"),
             @Result(property = "module", column = "module_id", 
                     one = @One(select = "org.example.lmsbackend.repository.ModulesMapper.findById"))
     })
@@ -46,6 +48,7 @@ public interface VideoMapper {
             @Result(property = "fileSize", column = "file_size"),
             @Result(property = "mimeType", column = "mime_type"),
             @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "published", column = "published"),
             @Result(property = "course", column = "course_id", 
                     one = @One(select = "org.example.lmsbackend.repository.CourseMapper.findById")),
             @Result(property = "instructor", column = "instructor_id", 
@@ -62,7 +65,8 @@ public interface VideoMapper {
             duration = #{duration},
             file_size = #{fileSize},
             mime_type = #{mimeType},
-            uploaded_at = #{uploadedAt}
+            uploaded_at = #{uploadedAt},
+            published = #{published}
         WHERE video_id = #{videoId}
     """)
     int updateVideo(Video video);
@@ -81,7 +85,7 @@ public interface VideoMapper {
         FROM videos v 
         JOIN courses c ON v.course_id = c.course_id
         JOIN users u ON v.instructor_id = u.user_id
-        WHERE v.course_id = #{courseId}
+        WHERE v.course_id = #{courseId} AND v.module_id IS NOT NULL
         """)
     @Results({
             @Result(property = "videoId", column = "video_id"),
@@ -92,6 +96,7 @@ public interface VideoMapper {
             @Result(property = "fileSize", column = "file_size"),
             @Result(property = "mimeType", column = "mime_type"),
             @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "published", column = "published"),
             @Result(property = "course", column = "course_id", 
                     one = @One(select = "org.example.lmsbackend.repository.CourseMapper.findById")),
             @Result(property = "instructor", column = "instructor_id", 
@@ -111,6 +116,7 @@ public interface VideoMapper {
             @Result(property = "mimeType", column = "mime_type"),
             @Result(property = "orderNumber", column = "order_number"),
             @Result(property = "uploadedAt", column = "uploaded_at"),
+            @Result(property = "published", column = "published"),
             @Result(property = "course", column = "course_id", 
                     one = @One(select = "org.example.lmsbackend.repository.CourseMapper.findById")),
             @Result(property = "instructor", column = "instructor_id", 

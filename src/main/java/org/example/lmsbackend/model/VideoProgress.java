@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class VideoProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long progressId;
+    private Integer progressId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -34,11 +34,11 @@ public class VideoProgress {
     }
 
     // Getters and Setters
-    public Long getProgressId() {
+    public Integer getProgressId() {
         return progressId;
     }
 
-    public void setProgressId(Long progressId) {
+    public void setProgressId(Integer progressId) {
         this.progressId = progressId;
     }
 

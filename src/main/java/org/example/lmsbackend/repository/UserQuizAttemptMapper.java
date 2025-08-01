@@ -20,7 +20,8 @@ public interface UserQuizAttemptMapper {
             "FROM user_quiz_attempts a " +
             "JOIN users u ON a.user_id = u.user_id " +
             "JOIN quizzes q ON a.quiz_id = q.quiz_id " +
-            "WHERE a.user_id = #{userId} AND a.quiz_id = #{quizId}")
+            "WHERE a.user_id = #{userId} AND a.quiz_id = #{quizId} " +
+            "ORDER BY a.score DESC, a.attempted_at DESC LIMIT 1")
     @Results({
         @Result(property = "attemptId", column = "attempt_id"),
         @Result(property = "score", column = "score"),

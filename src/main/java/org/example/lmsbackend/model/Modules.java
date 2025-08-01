@@ -21,6 +21,9 @@ public class Modules {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @Column(name = "course_id", insertable = false, updatable = false)
+    private Integer courseId;
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -45,6 +48,10 @@ public class Modules {
 
     public Course getCourse() {
         return course;
+    }
+
+    public Integer getCourseId() {
+        return courseId;
     }
 
     public String getTitle() {
@@ -74,6 +81,10 @@ public class Modules {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
     }
 
     public void setTitle(String title) {

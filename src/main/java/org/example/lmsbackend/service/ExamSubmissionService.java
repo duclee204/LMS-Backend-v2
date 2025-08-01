@@ -35,6 +35,9 @@ public class ExamSubmissionService {
     @Autowired
     private QuizResultService quizResultService;
 
+    @Autowired
+    private ModuleProgressService moduleProgressService;
+
     /**
      * Submit exam and return result immediately for multiple choice
      */
@@ -225,6 +228,13 @@ public class ExamSubmissionService {
             attempt.setScore((int) Math.round(result.getEarnedPoints()));
             userQuizAttemptMapper.updateAttemptScore(attempt.getId(), attempt.getScore());
             
+            // Update module progress when quiz is completed
+            if (quiz.getModule() != null) {
+                Integer moduleId = quiz.getModule().getId();
+                System.out.println("🎯 Updating test progress for user " + userId + " in module " + moduleId);
+                moduleProgressService.updateTestProgress(userId, moduleId, true);
+            }
+            
             return result;
             
         } catch (Exception e) {
@@ -244,6 +254,33 @@ public class ExamSubmissionService {
                 return false;
             }
 
+            // Check if user has any attempts (regardless of multiple attempts setting)
+            UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
+            boolean hasSubmitted = attempt != null;
+            
+            System.out.println("Query result: " + (attempt != null ? "Found attempt" : "No attempt found"));
+            System.out.println("Returning hasSubmitted: " + hasSubmitted);
+            
+            return hasSubmitted;
+        } catch (Exception e) {
+            System.err.println("Error checking if user submitted quiz: " + e.getMessage());
+            e.printStackTrace();
+            return false; // Default to false if error
+        }
+    }
+
+    /**
+     * Check if user can take quiz again (for multiple attempts)
+     */
+    public boolean canUserRetakeQuiz(Integer userId, Integer quizId) {
+        try {
+            System.out.println("=== Checking if user " + userId + " can retake quiz " + quizId + " ===");
+            
+            if (userId == null || quizId == null) {
+                System.out.println("User ID or Quiz ID is null - returning false");
+                return false;
+            }
+
             // First, get the quiz to check if multiple attempts are allowed
             Quizzes quiz = quizzesMapper.findById(quizId);
             if (quiz == null) {
@@ -255,20 +292,19 @@ public class ExamSubmissionService {
 
             // If multiple attempts are allowed, user can always retake
             if (quiz.getAllowMultipleAttempts() != null && quiz.getAllowMultipleAttempts()) {
-                System.out.println("✅ Multiple attempts allowed - user can take quiz");
-                return false; // Allow user to take quiz again
+                System.out.println("✅ Multiple attempts allowed - user can retake quiz");
+                return true;
             }
 
             // For single attempt quizzes, check if user has already submitted
             UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
-            boolean hasSubmitted = attempt != null;
+            boolean canRetake = attempt == null; // Can only take if never attempted
             
-            System.out.println("Query result: " + (attempt != null ? "Found attempt" : "No attempt found"));
-            System.out.println("Returning hasSubmitted: " + hasSubmitted);
+            System.out.println("Single attempt quiz - can retake: " + canRetake);
             
-            return hasSubmitted;
+            return canRetake;
         } catch (Exception e) {
-            System.err.println("Error checking if user submitted quiz: " + e.getMessage());
+            System.err.println("Error checking if user can retake quiz: " + e.getMessage());
             e.printStackTrace();
             return false; // Default to false if error
         }

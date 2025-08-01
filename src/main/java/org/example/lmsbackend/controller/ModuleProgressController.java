@@ -134,4 +134,113 @@ public class ModuleProgressController {
             ));
         }
     }
+
+    @GetMapping("/module/{moduleId}")
+    @PreAuthorize("hasAnyRole('student', 'instructor', 'admin')")
+    public ResponseEntity<?> getModuleProgress(
+            @PathVariable Integer moduleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            Integer userId = userDetails.getUserId();
+            ModuleProgress progress = moduleProgressService.getModuleProgress(userId, moduleId);
+            
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Error getting module progress: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Individual Content Progress Tracking
+    @PostMapping("/content-progress/{contentId}/viewed")
+    @PreAuthorize("hasAnyRole('student', 'instructor', 'admin')")
+    public ResponseEntity<?> markContentAsViewed(
+            @PathVariable Integer contentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            Integer userId = userDetails.getUserId();
+            moduleProgressService.markContentAsViewed(userId, contentId);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Content marked as viewed successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Error marking content as viewed: " + e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/content-progress/{contentId}")
+    @PreAuthorize("hasAnyRole('student', 'instructor', 'admin')")
+    public ResponseEntity<?> getContentProgress(
+            @PathVariable Integer contentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            Integer userId = userDetails.getUserId();
+            Map<String, Object> progress = moduleProgressService.getContentProgress(userId, contentId);
+            
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Error getting content progress: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Individual Video Progress Tracking
+    @PostMapping("/video-progress/{videoId}/watch")
+    @PreAuthorize("hasAnyRole('student', 'instructor', 'admin')")
+    public ResponseEntity<?> updateVideoWatchProgress(
+            @PathVariable Integer videoId,
+            @RequestBody Map<String, Object> request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            Integer userId = userDetails.getUserId();
+            Double watchedDuration = ((Number) request.get("watchedDuration")).doubleValue();
+            Double totalDuration = ((Number) request.get("totalDuration")).doubleValue();
+            Double watchedPercentage = ((Number) request.get("watchedPercentage")).doubleValue();
+            Boolean completed = (Boolean) request.get("completed");
+            
+            moduleProgressService.updateVideoWatchProgress(userId, videoId, watchedDuration, totalDuration, watchedPercentage, completed);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Video progress updated successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Error updating video progress: " + e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/video-progress/{videoId}")
+    @PreAuthorize("hasAnyRole('student', 'instructor', 'admin')")
+    public ResponseEntity<?> getVideoProgress(
+            @PathVariable Integer videoId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            Integer userId = userDetails.getUserId();
+            Map<String, Object> progress = moduleProgressService.getVideoProgress(userId, videoId);
+            
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Error getting video progress: " + e.getMessage()
+            ));
+        }
+    }
 }

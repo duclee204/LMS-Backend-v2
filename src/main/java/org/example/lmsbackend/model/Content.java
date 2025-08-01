@@ -11,7 +11,7 @@ public class Content {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "content_id", nullable = false)
-    private Integer id;
+    private Integer contentId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -39,8 +39,18 @@ public class Content {
     @Column(name = "published")
     private boolean published = false;
 
+    public Integer contentId() {
+        return contentId;
+    }
+
+    // Alias for contentId to match frontend expectations
+    public Integer getContentId() {
+        return contentId;
+    }
+
+    // Backward compatibility for existing code
     public Integer getId() {
-        return id;
+        return contentId;
     }
 
     public Modules getModule() {
@@ -76,8 +86,13 @@ public class Content {
     }
 
     // === SETTERS ===
-    public void setId(Integer id) {
-        this.id = id;
+    public void setContentId(Integer contentId) {
+        this.contentId = contentId;
+    }
+
+    // Backward compatibility for existing code
+    public void setId(Integer contentId) {
+        this.contentId = contentId;
     }
 
     public void setModule(Modules module) {

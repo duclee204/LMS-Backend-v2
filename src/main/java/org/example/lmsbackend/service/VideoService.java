@@ -2,6 +2,7 @@ package org.example.lmsbackend.service;
 
 import org.example.lmsbackend.dto.VideoDTO;
 import org.example.lmsbackend.utils.VideoMapperUtil;
+import org.example.lmsbackend.utils.VideoMetadataExtractor;
 import org.example.lmsbackend.model.Video;
 import org.example.lmsbackend.model.Course;
 import org.example.lmsbackend.model.User;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,14 +61,31 @@ public class VideoService {
     }
 
     public List<VideoDTO> getVideosByModule(Integer moduleId) {
-        List<Video> videos = videoMapper.findVideosByModuleId(moduleId);
-        return videos.stream()
-                .map(VideoMapperUtil::toDTO)
-                .collect(Collectors.toList());
+        try {
+            System.out.println("🎥 VideoService: Getting videos for moduleId: " + moduleId);
+            List<Video> videos = videoMapper.findVideosByModuleId(moduleId);
+            System.out.println("🎥 VideoService: Found " + videos.size() + " videos from database");
+            
+            List<VideoDTO> videoDTOs = videos.stream()
+                    .map(VideoMapperUtil::toDTO)
+                    .collect(Collectors.toList());
+            
+            System.out.println("🎥 VideoService: Converted to " + videoDTOs.size() + " DTOs");
+            return videoDTOs;
+        } catch (Exception e) {
+            System.err.println("❌ Error in VideoService.getVideosByModule: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
-    public VideoDTO uploadVideo(MultipartFile file, String title, String description, Integer courseId, Integer moduleId, Integer instructorId) {
+    public VideoDTO uploadVideo(MultipartFile file, String title, String description, Integer courseId, Integer moduleId, Boolean published, Integer instructorId) {
         try {
+            // Validate required parameters
+            if (moduleId == null) {
+                throw new IllegalArgumentException("Module ID is required for video upload");
+            }
+            
             String fileUrl = saveFile(file);
             if (fileUrl == null) return null;
             
@@ -76,6 +95,23 @@ public class VideoService {
             video.setFileUrl(fileUrl);
             video.setFileSize(file.getSize());
             video.setMimeType(file.getContentType());
+            video.setPublished(published != null ? published : false); // Set published status
+            
+            // Extract video duration using JAVE2
+            try {
+                // Construct the full file path for duration extraction
+                String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+                String fullFilePath = "uploads/videos/" + fileName;
+                
+                long durationInSeconds = VideoMetadataExtractor.extractDuration(fullFilePath);
+                video.setDuration((int) durationInSeconds); // Cast to Integer
+                
+                System.out.println("📹 Video uploaded with duration: " + durationInSeconds + " seconds");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to extract video duration: " + e.getMessage());
+                // Continue with upload even if duration extraction fails
+                video.setDuration(0);
+            }
             
             // Set course và instructor
             Course course = new Course();
@@ -86,12 +122,10 @@ public class VideoService {
             instructor.setUserId(instructorId);
             video.setInstructor(instructor);
             
-            // Set module if provided
-            if (moduleId != null) {
-                Modules module = new Modules();
-                module.setId(moduleId);
-                video.setModule(module);
-            }
+            // Set module (now required)
+            Modules module = new Modules();
+            module.setId(moduleId);
+            video.setModule(module);
             
             videoMapper.insertVideo(video);
             return VideoMapperUtil.toDTO(video);
@@ -176,6 +210,46 @@ public class VideoService {
             return "/videos/" + fileName;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Video management methods
+    public boolean updateVideoStatus(Long videoId, Boolean published) {
+        try {
+            Video video = videoMapper.findById(videoId);
+            if (video != null) {
+                video.setPublished(published);
+                int updated = videoMapper.updateVideo(video);
+                return updated > 0;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error updating video status: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public VideoDTO updateVideo(Long videoId, VideoDTO videoDTO) {
+        try {
+            Video existingVideo = videoMapper.findById(videoId);
+            if (existingVideo != null) {
+                // Update fields
+                existingVideo.setTitle(videoDTO.getTitle());
+                existingVideo.setDescription(videoDTO.getDescription());
+                existingVideo.setOrderNumber(videoDTO.getOrderNumber());
+                if (videoDTO.getPublished() != null) {
+                    existingVideo.setPublished(videoDTO.getPublished());
+                }
+                
+                int updated = videoMapper.updateVideo(existingVideo);
+                if (updated > 0) {
+                    return VideoMapperUtil.toDTO(existingVideo);
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error updating video: " + e.getMessage());
             return null;
         }
     }

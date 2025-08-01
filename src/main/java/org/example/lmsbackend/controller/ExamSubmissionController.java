@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,15 +79,18 @@ public class ExamSubmissionController {
             
             if (userDetails == null) {
                 System.out.println("❌ User details is null - authentication failed");
-                return ResponseEntity.status(401).body(Map.of(
-                    "hasSubmitted", false,
-                    "result", null,
-                    "success", false,
-                    "message", "Bạn cần đăng nhập để thực hiện thao tác này"
-                ));
+                Map<String, Object> authResponse = new HashMap<>();
+                authResponse.put("hasSubmitted", false);
+                authResponse.put("result", null);
+                authResponse.put("success", false);
+                authResponse.put("message", "Bạn cần đăng nhập để thực hiện thao tác này");
+                
+                return ResponseEntity.status(401).body(authResponse);
             }
             
             boolean hasSubmitted = examSubmissionService.hasUserSubmittedQuiz(
+                userDetails.getUserId(), quizId);
+            boolean canRetake = examSubmissionService.canUserRetakeQuiz(
                 userDetails.getUserId(), quizId);
             
             QuizResultDTO result = null;
@@ -100,29 +104,34 @@ public class ExamSubmissionController {
             if (hasSubmitted) {
                 result = examSubmissionService.getUserQuizResult(userDetails.getUserId(), quizId);
                 System.out.println("✅ User has submitted. Result found: " + (result != null));
+                System.out.println("✅ User can retake: " + canRetake);
             } else {
                 System.out.println("📝 User hasn't submitted yet");
             }
 
-            return ResponseEntity.ok().body(Map.of(
-                "hasSubmitted", hasSubmitted,
-                "result", result,
-                "success", true,
-                "attemptCount", attemptCount,
-                "attempts", attempts
-            ));
+            // Create response map with proper null handling
+            Map<String, Object> response = new HashMap<>();
+            response.put("hasSubmitted", hasSubmitted); // True if user ever completed the quiz
+            response.put("canRetake", canRetake); // True if user can take quiz (again)
+            response.put("result", result); // Can be null
+            response.put("success", true);
+            response.put("attemptCount", attemptCount);
+            response.put("attempts", attempts); // Can be null or empty
+
+            return ResponseEntity.ok().body(response);
 
         } catch (Exception e) {
             System.out.println("❌ Error in checkSubmission: " + e.getMessage());
             e.printStackTrace();
             // Even if there's an error, assume user hasn't submitted yet
             // This is normal for users who haven't taken the exam
-            return ResponseEntity.ok().body(Map.of(
-                "hasSubmitted", false,
-                "result", null,
-                "success", true,
-                "message", "Có thể làm bài thi"
-            ));
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("hasSubmitted", false);
+            errorResponse.put("result", null);
+            errorResponse.put("success", true);
+            errorResponse.put("message", "Có thể làm bài thi");
+            
+            return ResponseEntity.ok().body(errorResponse);
         }
     }
 

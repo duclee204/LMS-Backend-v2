@@ -45,7 +45,9 @@ public class QuizzesService {
         quiz.setAllowMultipleAttempts(dto.getAllowMultipleAttempts());
         quiz.setShowQuizResponses(dto.getShowQuizResponses());
         quiz.setShowOneQuestionAtATime(dto.getShowOneQuestionAtATime());
-        quiz.setPublish(dto.getPublish());
+        
+        // Ensure publish is never null - default to false if not provided
+        quiz.setPublish(dto.getPublish() != null ? dto.getPublish() : false);
         
         // Set course relationship properly
         if (dto.getCourseId() != null) {
@@ -84,12 +86,23 @@ public class QuizzesService {
         return dtos;
     }
 
-    public List<QuizzesDTO> getQuizzesByCourse(Integer courseId, Boolean publish) {
+    public List<QuizzesDTO> getQuizzesByCourse(Integer courseId, Boolean publish, Boolean withoutModule) {
         List<Quizzes> entities;
-        if (publish != null && publish) {
-            entities = quizzesRepository.findByCourseIdAndPublishTrue(courseId);
+        
+        if (withoutModule != null && withoutModule) {
+            // Get quizzes without module (moduleId is null)
+            if (publish != null && publish) {
+                entities = quizzesRepository.findByCourseIdAndPublishTrueAndModuleIsNull(courseId);
+            } else {
+                entities = quizzesRepository.findByCourseIdAndModuleIsNull(courseId);
+            }
         } else {
-            entities = quizzesRepository.findByCourseId(courseId);
+            // Get all quizzes (with and without module)
+            if (publish != null && publish) {
+                entities = quizzesRepository.findByCourseIdAndPublishTrue(courseId);
+            } else {
+                entities = quizzesRepository.findByCourseId(courseId);
+            }
         }
         
         List<QuizzesDTO> dtos = new ArrayList<>();
@@ -109,6 +122,11 @@ public class QuizzesService {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    // Keep the old method for backward compatibility
+    public List<QuizzesDTO> getQuizzesByCourse(Integer courseId, Boolean publish) {
+        return getQuizzesByCourse(courseId, publish, null);
     }
 
     public void updateQuiz(QuizzesDTO dto) {
@@ -208,10 +226,21 @@ public class QuizzesService {
     }
 
     public void updateQuizStatus(Integer quizId, boolean publish) {
+        System.out.println("=== Updating Quiz Status ===");
+        System.out.println("Quiz ID: " + quizId);
+        System.out.println("New Status: " + (publish ? "Published" : "Not Published"));
+        
         Quizzes quiz = quizzesRepository.findById(quizId)
             .orElseThrow(() -> new RuntimeException("Quiz not found with ID: " + quizId));
+        
+        boolean oldStatus = quiz.getPublish() != null ? quiz.getPublish() : false;
+        System.out.println("Old Status: " + (oldStatus ? "Published" : "Not Published"));
+        
         quiz.setPublish(publish);
-        quizzesRepository.save(quiz);
+        Quizzes savedQuiz = quizzesRepository.save(quiz);
+        
+        System.out.println("✅ Quiz status updated. New status: " + 
+            (savedQuiz.getPublish() ? "Published" : "Not Published"));
     }
 
     public List<QuizzesDTO> getQuizzesByModule(Integer moduleId, Boolean publish) {
@@ -239,5 +268,24 @@ public class QuizzesService {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    // Method to update all quizzes in a module when module status changes
+    public void updateQuizzesByModuleStatus(int moduleId, boolean published) {
+        try {
+            List<Quizzes> quizzes = quizzesRepository.findByModuleIdOrderByOrderNumber(moduleId);
+            for (Quizzes quiz : quizzes) {
+                boolean oldStatus = quiz.getPublish() != null ? quiz.getPublish() : false;
+                if (oldStatus != published) {
+                    quiz.setPublish(published);
+                    quizzesRepository.save(quiz);
+                    System.out.println("Quiz '" + quiz.getTitle() + "' status changed from " + 
+                        oldStatus + " to " + published);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error updating quizzes for module " + moduleId + ": " + e.getMessage());
+            throw e;
+        }
     }
 }

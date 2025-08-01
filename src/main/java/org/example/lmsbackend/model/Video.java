@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long videoId;
+    private Integer videoId;
 
     private String title;
     private String description;
@@ -38,11 +38,14 @@ public class Video {
 
     // Thêm quan hệ với Module
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "module_id")
+    @JoinColumn(name = "module_id", nullable = false)
     private Modules module;
 
     @Column(name = "order_number")
     private Integer orderNumber;
+
+    @Column(name = "published", nullable = false)
+    private Boolean published = false;
 
     @PrePersist
     protected void onCreate() {
@@ -51,11 +54,11 @@ public class Video {
 
     // Getters and Setters
 
-    public Long getVideoId() {
+    public Integer getVideoId() {
         return videoId;
     }
 
-    public void setVideoId(Long videoId) {
+    public void setVideoId(Integer videoId) {
         this.videoId = videoId;
     }
 
@@ -145,5 +148,13 @@ public class Video {
 
     public void setOrderNumber(Integer orderNumber) {
         this.orderNumber = orderNumber;
+    }
+
+    public Boolean getPublished() {
+        return published;
+    }
+
+    public void setPublished(Boolean published) {
+        this.published = published;
     }
 }

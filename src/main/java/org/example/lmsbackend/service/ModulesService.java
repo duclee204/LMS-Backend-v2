@@ -4,9 +4,12 @@ import org.example.lmsbackend.dto.ModulesDTO;
 import org.example.lmsbackend.model.Course;
 import org.example.lmsbackend.model.Modules;
 import org.example.lmsbackend.model.User;
+import org.example.lmsbackend.model.Video;
+import org.example.lmsbackend.model.Quizzes;
 import org.example.lmsbackend.repository.CourseRepository;
 import org.example.lmsbackend.repository.ModulesRepository;
 import org.example.lmsbackend.repository.UserMapper;
+import org.example.lmsbackend.repository.VideoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,6 +20,8 @@ public class ModulesService {
     @Autowired private CourseRepository courseRepository;
     @Autowired private ModulesRepository modulesRepository;
     @Autowired private UserMapper userMapper;
+    @Autowired private VideoMapper videoMapper;
+    @Autowired private QuizzesService quizzesService;
 
     public List<Modules> getModulesByCourseId(int courseId) {
         return modulesRepository.findByCourse_CourseIdOrderByOrderNumber(courseId);
@@ -83,11 +88,41 @@ public class ModulesService {
             }
         }
 
-        System.out.println("Updated " + updatedContentCount + " content items");
+        // Cập nhật tất cả video trong module theo trạng thái module
+        int updatedVideoCount = 0;
+        try {
+            List<Video> videos = videoMapper.findVideosByModuleId(moduleId);
+            for (Video video : videos) {
+                boolean oldStatus = video.getPublished() != null ? video.getPublished() : false;
+                if (oldStatus != published) {
+                    video.setPublished(published);
+                    videoMapper.updateVideo(video);
+                    updatedVideoCount++;
+                    System.out.println("Video '" + video.getTitle() + "' status changed from " + 
+                        oldStatus + " to " + published);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error updating videos: " + e.getMessage());
+        }
+
+        // Cập nhật tất cả quiz trong module theo trạng thái module
+        int updatedQuizCount = 0;
+        try {
+            // Sử dụng QuizzesService để lấy và cập nhật quiz
+            quizzesService.updateQuizzesByModuleStatus(moduleId, published);
+            updatedQuizCount = quizzesService.getQuizzesByModule(moduleId, null).size();
+            System.out.println("Updated " + updatedQuizCount + " quizzes in module " + moduleId);
+        } catch (Exception e) {
+            System.err.println("Error updating quizzes: " + e.getMessage());
+        }
+
+        System.out.println("Updated " + updatedContentCount + " content items, " + 
+                          updatedVideoCount + " videos, " + updatedQuizCount + " quizzes");
 
         Modules savedModule = modulesRepository.save(module); // cascade sẽ lưu cả content nếu có @OneToMany(cascade = ...)
         
-        System.out.println("✅ Module and all content status updated successfully");
+        System.out.println("✅ Module and all content/video/quiz status updated successfully");
         return savedModule;
     }
     // ✅ Cập nhật module

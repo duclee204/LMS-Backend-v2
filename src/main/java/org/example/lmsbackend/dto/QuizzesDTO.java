@@ -2,6 +2,7 @@ package org.example.lmsbackend.dto;
 
 import org.example.lmsbackend.model.Quizzes;
 import org.example.lmsbackend.model.Quizzes.QuizType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class QuizzesDTO {
     private Integer quizId;
@@ -45,6 +46,7 @@ public class QuizzesDTO {
     public Boolean getShowOneQuestionAtATime() { return showOneQuestionAtATime; }
     public void setShowOneQuestionAtATime(Boolean showOneQuestionAtATime) { this.showOneQuestionAtATime = showOneQuestionAtATime; }
 
+    @JsonProperty("published")
     public Boolean getPublish() { return publish; }
     public void setPublish(Boolean publish) { this.publish = publish; }
 

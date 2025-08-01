@@ -26,6 +26,14 @@ public class VideoMapperUtil {
             dto.setInstructorName(video.getInstructor().getFullName());
         }
         
+        // Thêm thông tin module
+        if (video.getModule() != null) {
+            dto.setModuleId(video.getModule().getId());
+        }
+        
+        dto.setOrderNumber(video.getOrderNumber());
+        dto.setPublished(video.getPublished());
+        
         return dto;
     }    
 }

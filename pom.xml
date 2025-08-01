@@ -134,6 +134,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- JAVE2 for video metadata extraction -->
+        <dependency>
+            <groupId>ws.schild</groupId>
+            <artifactId>jave-all-deps</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

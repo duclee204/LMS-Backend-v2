@@ -32,9 +32,10 @@ public class QuizzesRestController {
     @GetMapping
     public ResponseEntity<List<QuizzesDTO>> getAllQuizzes(
             @RequestParam(required = false) Integer courseId,
-            @RequestParam(required = false) Boolean publish) {
+            @RequestParam(required = false) Boolean publish,
+            @RequestParam(required = false) Boolean withoutModule) {
         if (courseId != null) {
-            return ResponseEntity.ok(quizService.getQuizzesByCourse(courseId, publish));
+            return ResponseEntity.ok(quizService.getQuizzesByCourse(courseId, publish, withoutModule));
         } else {
             return ResponseEntity.ok(quizService.getAllQuizzes());
         }
@@ -61,12 +62,14 @@ public class QuizzesRestController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('admin', 'instructor')")
     public ResponseEntity<?> updateQuiz(@RequestBody QuizzesDTO dto) {
         quizService.updateQuiz(dto);
         return ResponseEntity.ok().body(Map.of("message", "Quiz updated successfully", "success", true));
     }
 
     @PutMapping("/{quizId}/status")
+    @PreAuthorize("hasAnyRole('admin', 'instructor')")
     public ResponseEntity<?> updateQuizStatus(@PathVariable Integer quizId, @RequestParam boolean publish) {
         quizService.updateQuizStatus(quizId, publish);
         return ResponseEntity.ok().body(Map.of(
