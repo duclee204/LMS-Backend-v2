@@ -23,7 +23,8 @@ public class JwtTokenUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", "ROLE_" + user.getRole());     // ✅ Thêm prefix "ROLE_"
         claims.put("userId", user.getUserId());           // ✅ Đảm bảo không null
-        claims.put("fullName", user.getFullName());       // ✅ Thêm full name
+        claims.put("fullName", user.getFullName());
+        claims.put("avatarUrl", user.getAvatarUrl());  // ✅ THÊM DÒNG NÀY// ✅ Thêm full name
         return createToken(claims, user.getUsername());
     }
 
