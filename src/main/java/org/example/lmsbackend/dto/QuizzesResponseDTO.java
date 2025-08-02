@@ -12,6 +12,7 @@ public class QuizzesResponseDTO {
     private Integer timeLimit;
     private Boolean shuffleAnswers;
     private Boolean allowMultipleAttempts;
+    private Integer maxAttempts;
     private Boolean showQuizResponses;
     private Boolean showOneQuestionAtATime;
     private LocalDateTime dueDate;
@@ -79,6 +80,14 @@ public class QuizzesResponseDTO {
 
     public void setAllowMultipleAttempts(Boolean allowMultipleAttempts) {
         this.allowMultipleAttempts = allowMultipleAttempts;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 
     public Boolean getShowQuizResponses() {

@@ -30,14 +30,19 @@ public class ExamSubmissionController {
     public ResponseEntity<?> submitExam(@RequestBody ExamSubmissionDTO submissionDTO,
                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
-            // Check if user has already submitted this quiz
-            boolean hasSubmitted = examSubmissionService.hasUserSubmittedQuiz(
+            // Check if user can take this quiz (considers attempt limits)
+            boolean canTake = examSubmissionService.canUserRetakeQuiz(
                 userDetails.getUserId(), submissionDTO.getQuizId());
             
-            if (hasSubmitted) {
+            if (!canTake) {
+                // Get attempt count for detailed error message
+                int attemptCount = examSubmissionService.getUserAttemptCount(
+                    userDetails.getUserId(), submissionDTO.getQuizId());
+                
                 return ResponseEntity.badRequest().body(Map.of(
-                    "message", "Bạn đã hoàn thành bài thi này rồi.",
-                    "success", false
+                    "message", "Bạn đã hết số lần làm bài cho bài thi này. Số lần đã làm: " + attemptCount,
+                    "success", false,
+                    "attemptCount", attemptCount
                 ));
             }
 

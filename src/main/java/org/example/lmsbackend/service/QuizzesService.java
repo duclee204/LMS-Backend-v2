@@ -43,6 +43,7 @@ public class QuizzesService {
         quiz.setTimeLimit(dto.getTimeLimit());
         quiz.setShuffleAnswers(dto.getShuffleAnswers());
         quiz.setAllowMultipleAttempts(dto.getAllowMultipleAttempts());
+        quiz.setMaxAttempts(dto.getMaxAttempts() != null ? dto.getMaxAttempts() : 2);
         quiz.setShowQuizResponses(dto.getShowQuizResponses());
         quiz.setShowOneQuestionAtATime(dto.getShowOneQuestionAtATime());
         
@@ -138,6 +139,7 @@ public class QuizzesService {
         quiz.setTimeLimit(dto.getTimeLimit());
         quiz.setShuffleAnswers(dto.getShuffleAnswers());
         quiz.setAllowMultipleAttempts(dto.getAllowMultipleAttempts());
+        quiz.setMaxAttempts(dto.getMaxAttempts() != null ? dto.getMaxAttempts() : 2);
         quiz.setShowQuizResponses(dto.getShowQuizResponses());
         quiz.setShowOneQuestionAtATime(dto.getShowOneQuestionAtATime());
         quiz.setPublish(dto.getPublish());
@@ -202,6 +204,7 @@ public class QuizzesService {
         dto.setTimeLimit(quiz.getTimeLimit());
         dto.setShuffleAnswers(quiz.getShuffleAnswers());
         dto.setAllowMultipleAttempts(quiz.getAllowMultipleAttempts());
+        dto.setMaxAttempts(quiz.getMaxAttempts());
         dto.setShowQuizResponses(quiz.getShowQuizResponses());
         dto.setShowOneQuestionAtATime(quiz.getShowOneQuestionAtATime());
         dto.setPublish(quiz.getPublish());
@@ -261,6 +264,7 @@ public class QuizzesService {
             dto.setTimeLimit(q.getTimeLimit());
             dto.setShuffleAnswers(q.getShuffleAnswers());
             dto.setAllowMultipleAttempts(q.getAllowMultipleAttempts());
+            dto.setMaxAttempts(q.getMaxAttempts());
             dto.setShowQuizResponses(q.getShowQuizResponses());
             dto.setShowOneQuestionAtATime(q.getShowOneQuestionAtATime());
             dto.setPublish(q.getPublish());

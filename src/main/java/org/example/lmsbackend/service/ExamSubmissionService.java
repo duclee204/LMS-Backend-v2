@@ -289,18 +289,26 @@ public class ExamSubmissionService {
             }
 
             System.out.println("Quiz allowMultipleAttempts: " + quiz.getAllowMultipleAttempts());
+            System.out.println("Quiz maxAttempts: " + quiz.getMaxAttempts());
 
-            // If multiple attempts are allowed, user can always retake
-            if (quiz.getAllowMultipleAttempts() != null && quiz.getAllowMultipleAttempts()) {
-                System.out.println("✅ Multiple attempts allowed - user can retake quiz");
-                return true;
+            // If multiple attempts are not allowed, use old logic
+            if (quiz.getAllowMultipleAttempts() == null || !quiz.getAllowMultipleAttempts()) {
+                // For single attempt quizzes, check if user has already submitted
+                UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
+                boolean canRetake = attempt == null; // Can only take if never attempted
+                
+                System.out.println("Single attempt quiz - can retake: " + canRetake);
+                return canRetake;
             }
 
-            // For single attempt quizzes, check if user has already submitted
-            UserQuizAttempt attempt = userQuizAttemptMapper.findByUserAndQuiz(userId, quizId);
-            boolean canRetake = attempt == null; // Can only take if never attempted
+            // For multiple attempts, check attempt count vs maxAttempts
+            int currentAttempts = getUserAttemptCount(userId, quizId);
+            int maxAttempts = quiz.getMaxAttempts() != null ? quiz.getMaxAttempts() : 2; // Default to 2
             
-            System.out.println("Single attempt quiz - can retake: " + canRetake);
+            boolean canRetake = currentAttempts < maxAttempts;
+            
+            System.out.println("Multiple attempts quiz - current attempts: " + currentAttempts + 
+                             ", max attempts: " + maxAttempts + ", can retake: " + canRetake);
             
             return canRetake;
         } catch (Exception e) {

@@ -28,6 +28,7 @@ public class Quizzes {
     private Integer timeLimit;
     private Boolean shuffleAnswers = false;
     private Boolean allowMultipleAttempts = false;
+    private Integer maxAttempts = 2; // Default maximum attempts is 2
     private Boolean showQuizResponses = false;
     private Boolean showOneQuestionAtATime = false;
 
@@ -104,6 +105,14 @@ public class Quizzes {
 
     public void setAllowMultipleAttempts(Boolean allowMultipleAttempts) {
         this.allowMultipleAttempts = allowMultipleAttempts;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 
     public Boolean getShowQuizResponses() {

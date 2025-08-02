@@ -3,6 +3,7 @@ package org.example.lmsbackend.dto;
 import org.example.lmsbackend.model.Quizzes;
 import org.example.lmsbackend.model.Quizzes.QuizType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 public class QuizzesDTO {
     private Integer quizId;
@@ -12,6 +13,7 @@ public class QuizzesDTO {
     private Integer timeLimit;
     private Boolean shuffleAnswers;
     private Boolean allowMultipleAttempts;
+    private Integer maxAttempts;
     private Boolean showQuizResponses;
     private Boolean showOneQuestionAtATime;
     private Boolean publish;
@@ -40,6 +42,9 @@ public class QuizzesDTO {
     public Boolean getAllowMultipleAttempts() { return allowMultipleAttempts; }
     public void setAllowMultipleAttempts(Boolean allowMultipleAttempts) { this.allowMultipleAttempts = allowMultipleAttempts; }
 
+    public Integer getMaxAttempts() { return maxAttempts; }
+    public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
+
     public Boolean getShowQuizResponses() { return showQuizResponses; }
     public void setShowQuizResponses(Boolean showQuizResponses) { this.showQuizResponses = showQuizResponses; }
 
@@ -47,6 +52,7 @@ public class QuizzesDTO {
     public void setShowOneQuestionAtATime(Boolean showOneQuestionAtATime) { this.showOneQuestionAtATime = showOneQuestionAtATime; }
 
     @JsonProperty("published")
+    @JsonAlias({"publish", "published"})
     public Boolean getPublish() { return publish; }
     public void setPublish(Boolean publish) { this.publish = publish; }
 
